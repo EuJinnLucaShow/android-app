@@ -5,6 +5,7 @@ import {
   View,
   ImageBackground,
   TextInput,
+  TouchableOpacity,
 } from 'react-native';
 
 const wallpaper = require('./assets/images/wallpaper.png');
@@ -24,6 +25,9 @@ export default function App() {
             placeholder="Пароль"
             secureTextEntry={true}
           />
+          <TouchableOpacity style={styles.button} activeOpacity={0.8}>
+            <Text style={styles.buttonText}>Зареєструватися</Text>
+          </TouchableOpacity>
         </View>
       </ImageBackground>
       <StatusBar style="auto" />
@@ -53,5 +57,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6F6F6',
     borderRadius: 8,
     paddingHorizontal: 16,
+  },
+  button: {
+    marginHorizontal: 32,
+    marginTop: 43,
+    backgroundColor: '#FF6C00',
+    borderRadius: 100,
+    paddingVertical: 16,
+  },
+  buttonText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#fff',
+    fontFamily: 'Roboto',
+    fontWeight: '400',
   },
 });
