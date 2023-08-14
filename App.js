@@ -29,6 +29,8 @@ const initialState = {
 const loadFonts = () => {
   return Font.loadAsync({
     Roboto: require('./assets/fonts/Roboto-Regular.ttf'),
+    'Roboto-Bold': require('./assets/fonts/Roboto-Bold.ttf'),
+    'Roboto-Black': require('./assets/fonts/Roboto-Black.ttf'),
   });
 };
 
@@ -57,17 +59,11 @@ export default function App() {
         setAppIsReady(true);
       }
     }
-
     prepare();
   }, []);
 
   const onLayoutRootView = useCallback(async () => {
     if (appIsReady) {
-      // This tells the splash screen to hide immediately! If we call this after
-      // `setAppIsReady`, then we may see a blank screen while the app is
-      // loading its initial state and rendering its first pixels. So instead,
-      // we hide the splash screen once we know the root view has already
-      // performed layout.
       await SplashScreen.hideAsync();
     }
   }, [appIsReady]);
@@ -154,6 +150,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
+    position: 'fixed',
     justifyContent: 'flex-end',
   },
   form: {
@@ -167,7 +164,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 30,
     color: '#212121',
-    fontFamily: 'Roboto',
+    fontFamily: 'Roboto-Bold',
     fontWeight: '500',
     letterSpacing: 0.3,
     marginBottom: 33,
