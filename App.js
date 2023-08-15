@@ -1,30 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ImageBackground,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Keyboard,
-  TouchableWithoutFeedback,
-  Platform,
-} from 'react-native';
 
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
+import { createStackNavigator } from '@react-navigation/stack';
+import { NavigationContainer } from '@react-navigation/native';
+
+import RegistrationScreen from './src/screens/auth/RegistrationScreen';
+import LoginScreen from './src/screens/auth/LoginScreen';
 
 SplashScreen.preventAutoHideAsync();
-
-const wallpaper = require('./assets/images/wallpaper.png');
-
-const initialState = {
-  login: '',
-  email: '',
-  password: '',
-};
 
 const loadFonts = () => {
   return Font.loadAsync({
@@ -34,17 +18,22 @@ const loadFonts = () => {
   });
 };
 
-export default function App() {
-  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
-  const [state, setState] = useState(initialState);
-  const [appIsReady, setAppIsReady] = useState(false);
+const AuthStack = createStackNavigator();
 
-  const keyboardHide = () => {
-    setIsShowKeyboard(false);
-    Keyboard.dismiss();
-    console.log(state);
-    setState(initialState);
-  };
+const config = {
+  animation: 'spring',
+  config: {
+    stiffness: 1000, // 500
+    damping: 500, // 60
+    mass: 3, // 3
+    overshootClamping: true, // false
+    restDisplacementThreshold: 0.01, // 0.01
+    restSpeedThreshold: 0.01, // 0.01
+  },
+};
+
+export default function App() {
+  const [appIsReady, setAppIsReady] = useState(false);
 
   useEffect(() => {
     async function prepare() {
@@ -73,132 +62,33 @@ export default function App() {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={keyboardHide}>
-      <View style={styles.container} onLayout={onLayoutRootView}>
-        <ImageBackground source={wallpaper} style={styles.image}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          >
-            <View style={styles.form}>
-              <View
-                style={{
-                  width: 120,
-                  height: 120,
-                  borderRadius: 16,
-                  position: 'relative',
-                  left: '50%',
-                  marginLeft: -60,
-                  marginBottom: 16,
-                  backgroundColor: '#F6F6F6',
-                }}
-              ></View>
-              <Text style={styles.title}>Реєстрація</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Логін"
-                onFocus={() => setIsShowKeyboard(true)}
-                value={state.login}
-                onChangeText={value =>
-                  setState(prevState => ({ ...prevState, login: value }))
-                }
-              />
-              <TextInput
-                style={{ ...styles.input, marginTop: 16, marginBottom: 16 }}
-                placeholder="Адреса електронної пошти"
-                onFocus={() => setIsShowKeyboard(true)}
-                value={state.email}
-                onChangeText={value =>
-                  setState(prevState => ({ ...prevState, email: value }))
-                }
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Пароль"
-                secureTextEntry={true}
-                onFocus={() => setIsShowKeyboard(true)}
-                value={state.password}
-                onChangeText={value =>
-                  setState(prevState => ({ ...prevState, password: value }))
-                }
-              />
-              <TouchableOpacity
-                style={styles.button}
-                activeOpacity={0.8}
-                onPress={keyboardHide}
-              >
-                <Text style={styles.buttonText}>Зареєструватися</Text>
-              </TouchableOpacity>
-              <Text style={styles.text}>Вже є акаунт? Увійти</Text>
-            </View>
-          </KeyboardAvoidingView>
-        </ImageBackground>
-
-        <StatusBar style="auto" />
-      </View>
-    </TouchableWithoutFeedback>
+    <NavigationContainer onReady={onLayoutRootView}>
+      <AuthStack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <AuthStack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{
+            transitionSpec: {
+              open: config,
+              close: config,
+            },
+          }}
+        />
+        <AuthStack.Screen
+          name="Registration"
+          component={RegistrationScreen}
+          options={{
+            transitionSpec: {
+              open: config,
+              close: config,
+            },
+          }}
+        />
+      </AuthStack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  image: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-    position: 'fixed',
-    justifyContent: 'flex-end',
-  },
-  form: {
-    height: 550,
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    justifyContent: 'flex-end',
-  },
-  title: {
-    textAlign: 'center',
-    fontSize: 30,
-    color: '#212121',
-    fontFamily: 'Roboto-Bold',
-    fontWeight: '500',
-    letterSpacing: 0.3,
-    marginBottom: 33,
-  },
-  input: {
-    marginHorizontal: 16,
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-    backgroundColor: '#F6F6F6',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-  },
-  button: {
-    marginHorizontal: 32,
-    marginTop: 43,
-    backgroundColor: '#FF6C00',
-    borderRadius: 100,
-    paddingVertical: 16,
-  },
-  buttonText: {
-    textAlign: 'center',
-    fontSize: 16,
-    color: '#fff',
-    fontFamily: 'Roboto',
-    fontWeight: '400',
-  },
-  text: {
-    textAlign: 'center',
-    color: '#1B4371',
-    fontSize: 16,
-    fontFamily: 'Roboto',
-    fontWeight: '400',
-    marginTop: 16,
-    marginBottom: 66,
-  },
-});
