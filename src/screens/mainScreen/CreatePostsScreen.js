@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
@@ -11,88 +10,16 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { Camera } from 'expo-camera';
-import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
 import { FontAwesome, Feather, SimpleLineIcons } from '@expo/vector-icons';
 
 export default function CreatePostsScreen() {
-  const [postPhoto, setPostPhoto] = useState(null);
-  const [photoName, setPhotoName] = useState('');
-  const [photoLocationName, setPhotoLocationName] = useState('');
-  const [hasPermission, setHasPermission] = useState(null);
-  const [currentGeoLocation, setCurrentGeoLocation] = useState({});
-  const cameraRef = useRef(null);
-
-  useEffect(() => {
-    const getLocation = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      const coords = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      };
-      setCurrentGeoLocation(coords);
-    };
-
-    getLocation();
-  }, []);
-
-  useEffect(() => {
-    const requestCameraPermission = async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    };
-
-    requestCameraPermission();
-  }, []);
+  const [camera, setCamera] = useState(null);
 
   const takePhoto = async () => {
-    if (cameraRef.current) {
-      const { uri } = await cameraRef.current.takePictureAsync();
-      setPostPhoto(uri);
+    if (camera) {
+      const photo = await camera.takePictureAsync(null);
+      console.log(photo.uri);
     }
-  };
-
-  if (hasPermission === null) {
-    return <View />;
-  }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
-  }
-
-  const clearData = () => {
-    setPostPhoto(null);
-    setPhotoName('');
-    setPhotoLocationName('');
-  };
-
-  const uploadPhoto = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) setPostPhoto(result.assets[0].uri);
-  };
-
-  const handleSubmit = () => {
-    const data = {
-      img: postPhoto,
-      description: photoName,
-      likes: 0,
-      comments: [],
-      locationName: photoLocationName,
-      geoLocation: currentGeoLocation,
-    };
-    posts.unshift(data);
-    clearData();
-    navigation.navigate('Home', { screen: 'PostsScreen' });
   };
 
   return (
@@ -102,37 +29,25 @@ export default function CreatePostsScreen() {
       >
         <View style={styles.createPostsScreenContainer}>
           <View style={{ paddingLeft: 16, paddingRight: 16 }}>
-            {postPhoto ? (
-              <Image
-                source={{ uri: postPhoto }}
-                style={{
-                  marginTop: 32,
-                  width: '100%',
-                  height: 240,
-                  borderRadius: 8,
-                }}
-              />
-            ) : (
-              <Camera
-                style={{
-                  marginTop: 32,
-                  width: 350,
-                  height: 240,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-                type={Camera.Constants.Type.back}
-                ref={cameraRef}
+            <Camera
+              style={{
+                marginTop: 32,
+                width: 350,
+                height: 240,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+              type={Camera.Constants.Type.back}
+              ref={setCamera}
+            >
+              <TouchableOpacity
+                style={styles.addPhotoButton}
+                opacity={0.5}
+                onPress={takePhoto}
               >
-                <TouchableOpacity
-                  style={styles.addPhotoButton}
-                  opacity={0.5}
-                  onPress={takePhoto}
-                >
-                  <FontAwesome name="camera" size={24} color="#fff" />
-                </TouchableOpacity>
-              </Camera>
-            )}
+                <FontAwesome name="camera" size={24} color="#fff" />
+              </TouchableOpacity>
+            </Camera>
 
             <Text
               style={{
@@ -142,24 +57,15 @@ export default function CreatePostsScreen() {
                 lineHeight: 19,
                 marginTop: 8,
               }}
-              onPress={uploadPhoto}
-            >
-              {postPhoto ? 'Редагувати фото' : 'Завантажте фото'}
-            </Text>
+            ></Text>
 
-            <TextInput
-              style={styles.photoMetaInput}
-              placeholder="Назва..."
-              value={photoName}
-              onChangeText={setPhotoName}
-            />
+            <TextInput style={styles.photoMetaInput} placeholder="Назва..." />
             <View style={{ position: 'relative', marginBottom: 32 }}>
               <TouchableOpacity style={styles.mapButton}>
                 <SimpleLineIcons
                   name="location-pin"
                   size={20}
                   color="#BDBDBD"
-                  // style={{ position: 'absolute', top: 0, left: 0 }}
                 />
               </TouchableOpacity>
               <TextInput
@@ -167,58 +73,15 @@ export default function CreatePostsScreen() {
                 placeholder="Місцевість..."
                 type={'text'}
                 name={'photoLocation'}
-                value={photoLocationName}
-                onChangeText={setPhotoLocationName}
               />
             </View>
-            <TouchableOpacity
-              style={[
-                styles.publishButton,
-                postPhoto
-                  ? { backgroundColor: '#FF6C00' }
-                  : { backgroundColor: '#F6F6F6' },
-              ]}
-              activeOpacity={0.5}
-              onPress={handleSubmit}
-              disabled={!postPhoto}
-            >
-              <Text
-                style={[
-                  {
-                    fontSize: 16,
-                    textAlign: 'center',
-                    color: '#ffffff',
-                  },
-                  postPhoto
-                    ? {
-                        backgroundColor: '#FF6C00',
-                      }
-                    : {
-                        color: '#BDBDBD',
-                        backgroundColor: '#F6F6F6',
-                      },
-                ]}
-              >
-                Опубліковати
-              </Text>
+            <TouchableOpacity activeOpacity={0.5}>
+              <Text>Опубліковати</Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            onPress={clearData}
-            style={[
-              styles.removePostButton,
-              postPhoto
-                ? { backgroundColor: '#FF6C00' }
-                : { backgroundColor: '#F6F6F6' },
-            ]}
-            disabled={!postPhoto}
-          >
-            <Feather
-              name="trash-2"
-              size={24}
-              style={{ color: postPhoto ? '#fff' : '#BDBDBD' }}
-            />
+          <TouchableOpacity style={styles.removePostButton}>
+            <Feather name="trash-2" size={24} />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
