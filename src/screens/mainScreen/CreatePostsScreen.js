@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,18 +8,29 @@ import {
   Keyboard,
   StyleSheet,
   KeyboardAvoidingView,
+  Image,
 } from 'react-native';
 import { Camera } from 'expo-camera';
 import { FontAwesome, Feather, SimpleLineIcons } from '@expo/vector-icons';
 
-export default function CreatePostsScreen() {
+export default function CreatePostsScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
+  const [photo, setPhoto] = useState(null);
+
+  const clearData = () => {
+    setPhoto(null);
+  };
 
   const takePhoto = async () => {
     if (camera) {
       const photo = await camera.takePictureAsync(null);
-      console.log(photo.uri);
+      setPhoto(photo.uri);
     }
+  };
+
+  const sendPhoto = () => {
+    navigation.navigate('Posts', { photo });
+    clearData();
   };
 
   return (
@@ -28,26 +39,47 @@ export default function CreatePostsScreen() {
         behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.createPostsScreenContainer}>
-          <View style={{ paddingLeft: 16, paddingRight: 16 }}>
-            <Camera
-              style={{
-                marginTop: 32,
-                width: 350,
-                height: 240,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-              type={Camera.Constants.Type.back}
-              ref={setCamera}
-            >
-              <TouchableOpacity
-                style={styles.addPhotoButton}
-                opacity={0.5}
-                onPress={takePhoto}
+          <View>
+            {photo ? (
+              <View
+                style={{
+                  marginTop: 32,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
               >
-                <FontAwesome name="camera" size={24} color="#fff" />
-              </TouchableOpacity>
-            </Camera>
+                <Image
+                  source={{ uri: photo }}
+                  style={{
+                    width: 350,
+                    height: 240,
+                    borderRadius: 8,
+                  }}
+                />
+                <TouchableOpacity style={styles.addPhotoButton} opacity={0.5}>
+                  <FontAwesome name="camera" size={24} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <Camera
+                style={{
+                  borderRadius: 8,
+                  marginTop: 32,
+                  width: 350,
+                  height: 240,
+                }}
+                type={Camera.Constants.Type.back}
+                ref={setCamera}
+              >
+                <TouchableOpacity
+                  style={styles.addPhotoButton}
+                  opacity={0.5}
+                  onPress={takePhoto}
+                >
+                  <FontAwesome name="camera" size={24} color="#fff" />
+                </TouchableOpacity>
+              </Camera>
+            )}
 
             <Text
               style={{
@@ -57,7 +89,10 @@ export default function CreatePostsScreen() {
                 lineHeight: 19,
                 marginTop: 8,
               }}
-            ></Text>
+            >
+              {' '}
+              {photo ? 'Редагувати фото' : 'Завантажте фото'}
+            </Text>
 
             <TextInput style={styles.photoMetaInput} placeholder="Назва..." />
             <View style={{ position: 'relative', marginBottom: 32 }}>
@@ -75,8 +110,36 @@ export default function CreatePostsScreen() {
                 name={'photoLocation'}
               />
             </View>
-            <TouchableOpacity activeOpacity={0.5}>
-              <Text>Опубліковати</Text>
+            <TouchableOpacity
+              style={[
+                styles.publishButton,
+                photo
+                  ? { backgroundColor: '#FF6C00' }
+                  : { backgroundColor: '#F6F6F6' },
+              ]}
+              activeOpacity={0.5}
+              onPress={sendPhoto}
+              disabled={!photo}
+            >
+              <Text
+                style={[
+                  {
+                    fontSize: 16,
+                    textAlign: 'center',
+                    color: '#ffffff',
+                  },
+                  photo
+                    ? {
+                        backgroundColor: '#FF6C00',
+                      }
+                    : {
+                        color: '#BDBDBD',
+                        backgroundColor: '#F6F6F6',
+                      },
+                ]}
+              >
+                Опубліковати
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -94,6 +157,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   addPhotoButton: {
     position: 'absolute',
