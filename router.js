@@ -8,9 +8,9 @@ const MainTab = createBottomTabNavigator();
 
 import RegistrationScreen from './src/screens/auth/RegistrationScreen';
 import LoginScreen from './src/screens/auth/LoginScreen';
-import PostsScreen from './src/screens/mainScreen/PostsScreen';
-import CreatePostsScreen from './src/screens/mainScreen/CreatePostsScreen';
-import ProfileScreen from './src/screens/mainScreen/ProfileScreen';
+import HomeScreen from './src/screens/mainScreens/HomeScreen';
+import CreatePostsScreen from './src/screens/mainScreens/CreatePostsScreen';
+import ProfileScreen from './src/screens/mainScreens/ProfileScreen';
 
 import { Feather } from '@expo/vector-icons';
 
@@ -35,9 +35,10 @@ export const UseRoute = isAuth => {
       }}
     >
       <MainTab.Screen
-        name="Posts"
-        component={PostsScreen}
+        name="Home"
+        component={HomeScreen}
         options={{
+          headerShown: false,
           tabBarIcon: ({ focused, size, color }) => (
             <Feather
               name="grid"

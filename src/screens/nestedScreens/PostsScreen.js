@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, SafeAreaView, FlatList, StyleSheet, Image } from 'react-native';
+import {
+  View,
+  SafeAreaView,
+  FlatList,
+  StyleSheet,
+  Image,
+  Text,
+} from 'react-native';
 
 export default function PostsScreen({ route }) {
   const [post, setPost] = useState([]);
@@ -16,6 +23,7 @@ export default function PostsScreen({ route }) {
   const Item = ({ item }) => (
     <View style={styles.item}>
       <Image source={{ uri: item.photo }} style={{ height: 200 }} />
+      <Text>tttttttttttt</Text>
     </View>
   );
 

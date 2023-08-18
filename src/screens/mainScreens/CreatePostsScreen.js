@@ -17,6 +17,7 @@ import { FontAwesome, Feather, SimpleLineIcons } from '@expo/vector-icons';
 export default function CreatePostsScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
   const [photo, setPhoto] = useState(null);
+  const [location, setLocation] = useState(null);
 
   const clearData = () => {
     setPhoto(null);
@@ -26,13 +27,13 @@ export default function CreatePostsScreen({ navigation }) {
     if (camera) {
       const photo = await camera.takePictureAsync(null);
       const location = await Location.getCurrentPositionAsync({});
-      console.log(location);
+      setLocation(location);
       setPhoto(photo.uri);
     }
   };
 
   const sendPhoto = () => {
-    navigation.navigate('Posts', { photo });
+    navigation.navigate('Posts', { photo, location });
     clearData();
   };
 

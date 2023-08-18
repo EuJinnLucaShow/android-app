@@ -2,9 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
+
+import { Provider } from 'react-redux';
+
 import { NavigationContainer } from '@react-navigation/native';
 
 import { UseRoute } from './router';
+import { store } from './src/redux/store';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -18,7 +22,7 @@ const loadFonts = () => {
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
-  const routing = UseRoute({});
+  const routing = UseRoute(false);
 
   useEffect(() => {
     async function prepare() {
@@ -47,8 +51,10 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer onReady={onLayoutRootView}>
-      {routing}
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer onReady={onLayoutRootView}>
+        {routing}
+      </NavigationContainer>
+    </Provider>
   );
 }
