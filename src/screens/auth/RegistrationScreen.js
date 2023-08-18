@@ -12,6 +12,9 @@ import {
   TouchableWithoutFeedback,
   Platform,
 } from 'react-native';
+import { useDispatch } from 'react-redux';
+
+import { authSingUp } from '../../redux/auth/authOperations';
 
 const wallpaper = require('../../../assets/images/wallpaper.png');
 
@@ -25,10 +28,12 @@ export default function RegistrationScreen({ navigation }) {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [state, setState] = useState(initialState);
 
-  const keyboardHide = () => {
+  const dispatch = useDispatch();
+
+  const handleSubmit = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
-    console.log(state);
+    dispatch(authSingUp(state));
     setState(initialState);
   };
 
@@ -89,7 +94,7 @@ export default function RegistrationScreen({ navigation }) {
               <TouchableOpacity
                 style={styles.button}
                 activeOpacity={0.8}
-                onPress={keyboardHide}
+                onPress={handleSubmit}
               >
                 <Text style={styles.buttonText}>Зареєструватися</Text>
               </TouchableOpacity>
