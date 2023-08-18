@@ -13,6 +13,9 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 
+import { useDispatch } from 'react-redux';
+import { authSingIn } from '../../redux/auth/authOperations';
+
 const wallpaper = require('../../../assets/images/wallpaper.png');
 
 const initialState = {
@@ -23,6 +26,15 @@ const initialState = {
 export default function LoginScreen({ navigation }) {
   const [state, setState] = useState(initialState);
   const [isShowKeybord, setIsShowKeybord] = useState(false);
+
+  const dispatch = useDispatch();
+
+  const handleSubmit = () => {
+    setIsShowKeybord(false);
+    Keyboard.dismiss();
+    dispatch(authSingIn(state));
+    setState(initialState);
+  };
 
   return (
     <TouchableWithoutFeedback
@@ -48,6 +60,10 @@ export default function LoginScreen({ navigation }) {
                 onFocus={() => {
                   setIsShowKeybord(true);
                 }}
+                value={state.email}
+                onChangeText={value =>
+                  setState(prevState => ({ ...prevState, email: value }))
+                }
                 placeholder="Адреса електронної пошти"
                 autoComplete="email"
                 keyboardType="email-address"
@@ -60,12 +76,21 @@ export default function LoginScreen({ navigation }) {
                 }}
                 placeholder="Пароль"
                 autoComplete="password"
+                secureTextEntry={true}
+                value={state.password}
+                onChangeText={value =>
+                  setState(prevState => ({ ...prevState, password: value }))
+                }
               />
 
               <TouchableOpacity style={styles.showPassword} activeOpacity={0.5}>
                 <Text style={styles.showPasswordText}>Показати</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.button} activeOpacity={0.5}>
+              <TouchableOpacity
+                style={styles.button}
+                activeOpacity={0.5}
+                onPress={handleSubmit}
+              >
                 <Text style={styles.titlebutton}>Увійти</Text>
               </TouchableOpacity>
               <Text style={styles.titletext}>

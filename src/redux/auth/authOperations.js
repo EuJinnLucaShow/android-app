@@ -12,6 +12,14 @@ export const authSingUp =
     }
   };
 
-const authSingIn = () => async (dispatch, getState) => {};
+export const authSingIn =
+  ({ email, password }) =>
+  async (dispatch, getState) => {
+    try {
+      const user = await db.auth().signInWithEmailAndPassword(email, password);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
 const authSingOut = () => async (dispatch, getState) => {};

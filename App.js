@@ -9,6 +9,7 @@ import { NavigationContainer } from '@react-navigation/native';
 
 import { UseRoute } from './router';
 import { store } from './src/redux/store';
+import db from './firebase/config';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,7 +23,11 @@ const loadFonts = () => {
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
-  const routing = UseRoute(false);
+  const [user, setUser] = useState(null);
+
+  db.auth().onAuthStateChanged(user => setUser(user));
+
+  const routing = UseRoute(user);
 
   useEffect(() => {
     async function prepare() {
