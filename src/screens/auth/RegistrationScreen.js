@@ -33,11 +33,16 @@ export default function RegistrationScreen({ navigation }) {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={keyboardHide}>
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss(), setIsShowKeyboard(false);
+      }}
+    >
       <View style={styles.container}>
         <ImageBackground source={wallpaper} style={styles.image}>
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1, justifyContent: 'flex-end' }}
           >
             <View style={styles.form}>
               <View
@@ -88,7 +93,12 @@ export default function RegistrationScreen({ navigation }) {
               >
                 <Text style={styles.buttonText}>Зареєструватися</Text>
               </TouchableOpacity>
-              <Text style={styles.text}>
+              <Text
+                style={{
+                  ...styles.text,
+                  marginBottom: isShowKeyboard ? 0 : 66,
+                }}
+              >
                 Вже є акаунт?{' '}
                 <Text
                   style={{ color: '#FF6C00', textDecorationLine: 'underline' }}
@@ -167,6 +177,5 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto',
     fontWeight: '400',
     marginTop: 16,
-    marginBottom: 66,
   },
 });
