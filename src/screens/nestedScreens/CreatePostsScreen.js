@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Image,
 } from 'react-native';
 import { Camera } from 'expo-camera';
+import * as Location from 'expo-location';
 import { FontAwesome, Feather, SimpleLineIcons } from '@expo/vector-icons';
 
 export default function CreatePostsScreen({ navigation }) {
@@ -24,6 +25,8 @@ export default function CreatePostsScreen({ navigation }) {
   const takePhoto = async () => {
     if (camera) {
       const photo = await camera.takePictureAsync(null);
+      const location = await Location.getCurrentPositionAsync({});
+      console.log(location);
       setPhoto(photo.uri);
     }
   };
@@ -32,6 +35,16 @@ export default function CreatePostsScreen({ navigation }) {
     navigation.navigate('Posts', { photo });
     clearData();
   };
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+    })();
+  });
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -173,7 +186,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   photoMetaInput: {
-    width: '100%',
     height: 50,
     marginBottom: 16,
     fontSize: 16,
@@ -187,7 +199,6 @@ const styles = StyleSheet.create({
     top: 13,
   },
   publishButton: {
-    width: '100%',
     height: 50,
     marginBottom: 120,
     padding: 16,
