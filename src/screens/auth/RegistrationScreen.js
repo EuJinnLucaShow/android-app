@@ -16,7 +16,7 @@ import { useDispatch } from 'react-redux';
 
 import { authSingUp } from '../../redux/auth/authOperations';
 
-const wallpaper = require('../../../assets/images/wallpaper.png');
+const wallpaper = require('../../assets/images/wallpaper.png');
 
 const initialState = {
   login: '',

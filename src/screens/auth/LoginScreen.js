@@ -16,7 +16,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { authSingIn } from '../../redux/auth/authOperations';
 
-const wallpaper = require('../../../assets/images/wallpaper.png');
+const wallpaper = require('../../assets/images/wallpaper.png');
 
 const initialState = {
   email: '',

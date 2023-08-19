@@ -1,4 +1,4 @@
-import db from '../../../firebase/config';
+import db from '../../firebase/config';
 
 export const authSingUp =
   ({ login, email, password }) =>
@@ -17,6 +17,7 @@ export const authSingIn =
   async (dispatch, getState) => {
     try {
       const user = await db.auth().signInWithEmailAndPassword(email, password);
+      console.log(user);
     } catch (error) {
       console.log(error.message);
     }

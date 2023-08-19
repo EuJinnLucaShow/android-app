@@ -9,15 +9,15 @@ import { NavigationContainer } from '@react-navigation/native';
 
 import { UseRoute } from './router';
 import { store } from './src/redux/store';
-import db from './firebase/config';
+import db from './src/firebase/config';
 
 SplashScreen.preventAutoHideAsync();
 
 const loadFonts = () => {
   return Font.loadAsync({
-    Roboto: require('./assets/fonts/Roboto-Regular.ttf'),
-    'Roboto-Bold': require('./assets/fonts/Roboto-Bold.ttf'),
-    'Roboto-Black': require('./assets/fonts/Roboto-Black.ttf'),
+    Roboto: require('./src/assets/fonts/Roboto-Regular.ttf'),
+    'Roboto-Bold': require('./src/assets/fonts/Roboto-Bold.ttf'),
+    'Roboto-Black': require('./src/assets/fonts/Roboto-Black.ttf'),
   });
 };
 
