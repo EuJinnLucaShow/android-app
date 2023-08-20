@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font'; // Import the Font module
 import { store } from './src/redux/store';
-import Main from './src/components/West';
+import Main from './src/components/Main';
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
