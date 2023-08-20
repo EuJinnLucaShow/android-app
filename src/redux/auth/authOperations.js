@@ -5,11 +5,15 @@ export const authSingUp =
   ({ login, email, password }) =>
   async (dispatch, getState) => {
     try {
-      const { user } = await db
-        .auth()
-        .createUserWithEmailAndPassword(email, password);
+      await db.auth().createUserWithEmailAndPassword(email, password);
+      const user = await db.auth().currentUser;
+      await user.updateProfile({ displayName: login });
+      const { uid, displayName } = await db.auth().currentUser;
       dispatch(
-        authSlice.actions.updateUserProfile({ login, userId: user.uid })
+        authSlice.actions.updateUserProfile({
+          userId: uid,
+          login: displayName,
+        })
       );
     } catch (error) {
       console.log(error.message);
@@ -26,5 +30,9 @@ export const authSingIn =
       console.log(error.message);
     }
   };
+
+export const authStateChange = () => async (dispatch, getState) => {
+  await db.auth().onAuthStateChanged(user => setUser(user));
+};
 
 const authSingOut = () => async (dispatch, getState) => {};
