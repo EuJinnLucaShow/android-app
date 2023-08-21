@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font'; // Import the Font module
@@ -26,14 +26,14 @@ export default function App() {
     prepare();
   }, []);
 
-  const onLayoutRootView = () => {
+  const onLayoutRootView = useCallback(async () => {
     if (appIsReady) {
-      SplashScreen.hideAsync();
+      await SplashScreen.hideAsync();
     }
-  };
+  });
 
   if (!appIsReady) {
-    return null; // You might consider displaying a loading indicator here
+    return null;
   }
 
   return (

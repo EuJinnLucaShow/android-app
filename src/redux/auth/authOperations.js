@@ -7,14 +7,17 @@ export const authSingUp =
     try {
       await db.auth().createUserWithEmailAndPassword(email, password);
       const user = await db.auth().currentUser;
+
       await user.updateProfile({ displayName: login });
+
       const { uid, displayName } = await db.auth().currentUser;
-      dispatch(
-        authSlice.actions.updateUserProfile({
-          userId: uid,
-          login: displayName,
-        })
-      );
+
+      const userUpdateProfile = {
+        userId: uid,
+        login: displayName,
+      };
+
+      dispatch(authSlice.actions.updateUserProfile(userUpdateProfile));
     } catch (error) {
       console.log(error.message);
     }
@@ -32,7 +35,19 @@ export const authSingIn =
   };
 
 export const authStateChange = () => async (dispatch, getState) => {
-  await db.auth().onAuthStateChanged(user => setUser(user));
+  await db.auth().onAuthStateChanged(user => {
+    console.log(user);
+    if (user) {
+      const userUpdateProfile = {
+        userId: user.uid,
+        login: user.displayName,
+      };
+      dispatch(authSlice.actions.updateUserProfile(userUpdateProfile));
+      dispatch(authSlice.actions.authStateChange({ stateChange: true }));
+    } else {
+      console.log('user is not logged in');
+    }
+  });
 };
 
 const authSingOut = () => async (dispatch, getState) => {};
