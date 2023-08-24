@@ -8,9 +8,16 @@ import {
   Image,
 } from 'react-native';
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { Feather, AntDesign } from '@expo/vector-icons';
+import { authSingOutUser } from '../../redux/auth/authOperations';
 
 export default function ProfileScreen() {
+  const dispatch = useDispatch();
+  const singOut = () => {
+    dispatch(authSingOutUser());
+  };
+
   return (
     <ImageBackground style={styles.imageBackground}>
       <View style={styles.container}>
@@ -21,7 +28,11 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
         <Text style={styles.title}>Natali Romanova</Text>
-        <TouchableOpacity style={styles.logoutButton} activeOpacity={0.5}>
+        <TouchableOpacity
+          style={styles.logoutButton}
+          activeOpacity={0.5}
+          onPress={singOut}
+        >
           <Feather name="log-out" size={25} color="gray" />
         </TouchableOpacity>
 

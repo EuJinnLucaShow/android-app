@@ -27,6 +27,7 @@ export const UseRoute = isAuth => {
       </AuthStack.Navigator>
     );
   }
+
   return (
     <MainTab.Navigator
       screenOptions={{

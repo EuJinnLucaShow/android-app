@@ -1,5 +1,8 @@
-import db from '../../firebase/config';
+import db from '../../../FirebaseConfig';
 import { authSlice } from './authReducer';
+
+const { updateUserProfile, authStateChangeUser, authSingOut } =
+  authSlice.actions;
 
 export const authSingUp =
   ({ login, email, password }) =>
@@ -17,7 +20,7 @@ export const authSingUp =
         login: displayName,
       };
 
-      dispatch(authSlice.actions.updateUserProfile(userUpdateProfile));
+      dispatch(updateUserProfile(userUpdateProfile));
     } catch (error) {
       console.log(error.message);
     }
@@ -42,12 +45,15 @@ export const authStateChange = () => async (dispatch, getState) => {
         userId: user.uid,
         login: user.displayName,
       };
-      dispatch(authSlice.actions.updateUserProfile(userUpdateProfile));
-      dispatch(authSlice.actions.authStateChange({ stateChange: true }));
+      dispatch(updateUserProfile(userUpdateProfile));
+      dispatch(authStateChangeUser({ stateChange: true }));
     } else {
       console.log('user is not logged in');
     }
   });
 };
 
-const authSingOut = () => async (dispatch, getState) => {};
+export const authSingOutUser = () => async (dispatch, getState) => {
+  await db.auth().signOut();
+  dispatch(authSingOut());
+};
