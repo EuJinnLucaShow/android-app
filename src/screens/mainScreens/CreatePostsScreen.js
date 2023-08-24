@@ -37,6 +37,16 @@ export default function CreatePostsScreen({ navigation }) {
     clearData();
   };
 
+  const uploadPhotoToServer = async () => {
+    const response = await fetch(photo);
+    const blob = await response.blob();
+    const ref = firebase
+      .storage()
+      .ref()
+      .child('images/' + photo);
+    return ref.put(blob);
+  };
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
