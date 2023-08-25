@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 
-import { authSingUp } from '../../redux/auth/authOperations';
+import { authSignInUser } from '../../redux/auth/authOperations';
 
 const wallpaper = require('../../assets/images/wallpaper.png');
 
@@ -33,7 +33,7 @@ export default function RegistrationScreen({ navigation }) {
   const handleSubmit = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
-    dispatch(authSingUp(state));
+    dispatch(authSignInUser(state));
     setState(initialState);
   };
 

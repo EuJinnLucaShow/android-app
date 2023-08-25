@@ -14,7 +14,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 
 import { useDispatch } from 'react-redux';
-import { authSingIn } from '../../redux/auth/authOperations';
+import { authSignInUser } from '../../redux/auth/authOperations';
 
 const wallpaper = require('../../assets/images/wallpaper.png');
 
@@ -32,7 +32,7 @@ export default function LoginScreen({ navigation }) {
   const handleSubmit = () => {
     setIsShowKeybord(false);
     Keyboard.dismiss();
-    dispatch(authSingIn(state));
+    dispatch(authSignInUser(state));
     setState(initialState);
   };
 

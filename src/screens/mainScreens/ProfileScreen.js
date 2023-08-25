@@ -10,12 +10,12 @@ import {
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { Feather, AntDesign } from '@expo/vector-icons';
-import { authSingOutUser } from '../../redux/auth/authOperations';
+import { authSignOutUser } from '../../redux/auth/authOperations';
 
 export default function ProfileScreen() {
   const dispatch = useDispatch();
   const singOut = () => {
-    dispatch(authSingOutUser());
+    dispatch(authSignOutUser());
   };
 
   return (

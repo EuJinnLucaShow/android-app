@@ -1,59 +1,119 @@
-import db from '../../../FirebaseConfig';
+import { Alert } from 'react-native';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  updateProfile,
+  signOut,
+} from 'firebase/auth';
+
+import { auth } from '../../../FirebaseConfig';
 import { authSlice } from './authReducer';
 
-const { updateUserProfile, authStateChangeUser, authSingOut } =
+const { updateUserProfile, authStateChange, updateUserAvatar, authSignOut } =
   authSlice.actions;
 
-export const authSingUp =
-  ({ login, email, password }) =>
+export const authSignUpUser =
+  ({ email, password, name, userAvatar }) =>
   async (dispatch, getState) => {
     try {
-      await db.auth().createUserWithEmailAndPassword(email, password);
-      const user = await db.auth().currentUser;
+      await createUserWithEmailAndPassword(auth, email, password);
+      const user = auth.currentUser;
 
-      await user.updateProfile({ displayName: login });
+      await updateProfile(user, { displayName: name, photoURL: userAvatar });
 
-      const { uid, displayName } = await db.auth().currentUser;
+      const { uid, displayName, photoURL } = user;
 
-      const userUpdateProfile = {
-        userId: uid,
-        login: displayName,
-      };
-
-      dispatch(updateUserProfile(userUpdateProfile));
+      dispatch(
+        updateUserProfile({
+          userId: uid,
+          name: displayName,
+          email,
+          avatar: photoURL,
+        })
+      );
     } catch (error) {
-      console.log(error.message);
+      const errorCode = error.code;
+
+      if (errorCode == 'auth/weak-password') {
+        Alert.alert('The password is too weak');
+      }
+      if (errorCode == 'auth/email-already-in-use') {
+        Alert.alert('Already exists an account with the given email address');
+      }
+      if (errorCode == 'auth/invalid-email') {
+        Alert.alert('Email address is not valid and it is required');
+      } else {
+        throw error;
+      }
     }
   };
 
-export const authSingIn =
+export const authSignInUser =
   ({ email, password }) =>
   async (dispatch, getState) => {
+    console.log('credential: ', email, password);
     try {
-      const user = await db.auth().signInWithEmailAndPassword(email, password);
-      console.log(user);
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
-      console.log(error.message);
+      const errorCode = error.code;
+
+      if (errorCode === 'auth/wrong-password') {
+        Alert.alert('Password is invalid for the given email');
+      }
+      if (errorCode === 'auth/user-not-found') {
+        Alert.alert('No user corresponding to the given email');
+      }
+      if (errorCode === 'auth/user-disabled') {
+        Alert.alert('User corresponding to the given email has been disabled');
+      }
+      if (errorCode === 'auth/invalid-email') {
+        Alert.alert('Email address is not valid and it`s required');
+      } else {
+        throw error;
+      }
     }
   };
 
-export const authStateChange = () => async (dispatch, getState) => {
-  await db.auth().onAuthStateChanged(user => {
-    console.log(user);
-    if (user) {
-      const userUpdateProfile = {
-        userId: user.uid,
-        login: user.displayName,
-      };
-      dispatch(updateUserProfile(userUpdateProfile));
-      dispatch(authStateChangeUser({ stateChange: true }));
-    } else {
-      console.log('user is not logged in');
+export const authStateChangeUser = () => async dispatch => {
+  await onAuthStateChanged(auth, user => {
+    try {
+      if (user) {
+        const userUpdateProfile = {
+          userId: user.uid,
+          name: user.displayName,
+          email: user.email,
+          avatar: user.photoURL,
+        };
+
+        dispatch(authStateChange({ stateChange: true }));
+        dispatch(updateUserProfile(userUpdateProfile));
+      }
+    } catch (error) {
+      signOut(auth);
+      dispatch(authSignOut());
+      throw error;
     }
   });
 };
 
-export const authSingOutUser = () => async (dispatch, getState) => {
-  await db.auth().signOut();
-  dispatch(authSingOut());
+export const changeAvatarUser = newAvatarURL => async (dispatch, getState) => {
+  const user = auth.currentUser;
+
+  if (user !== null) {
+    await updateProfile(user, {
+      photoURL: newAvatarURL,
+    });
+  }
+  dispatch(updateUserAvatar({ avatar: newAvatarURL }));
+};
+
+export const authSignOutUser = () => async (dispatch, getState) => {
+  try {
+    await signOut(auth);
+    dispatch(authSignOut());
+  } catch (error) {
+    Alert.alert(error.message);
+    throw error;
+  }
 };

@@ -14,6 +14,9 @@ import { Camera } from 'expo-camera';
 import * as Location from 'expo-location';
 import { FontAwesome, Feather, SimpleLineIcons } from '@expo/vector-icons';
 
+import { storage } from '../../../FirebaseConfig';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+
 export default function CreatePostsScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
   const [photo, setPhoto] = useState(null);
@@ -33,18 +36,28 @@ export default function CreatePostsScreen({ navigation }) {
   };
 
   const sendPhoto = () => {
+    uploadPhotoToServer();
     navigation.navigate('Posts', { photo, location });
     clearData();
   };
 
   const uploadPhotoToServer = async () => {
     const response = await fetch(photo);
-    const blob = await response.blob();
-    const ref = firebase
-      .storage()
-      .ref()
-      .child('images/' + photo);
-    return ref.put(blob);
+    const file = await response.blob();
+
+    const uniqueImageId = Date.now().toString();
+    const path = `images/${uniqueImageId}.jpeg`;
+
+    const storageRef = ref(storage, path);
+
+    const metadata = {
+      contentType: 'image/jpeg',
+    };
+
+    await uploadBytes(storageRef, file, metadata);
+
+    const downloadPhoto = await getDownloadURL(storageRef);
+    return downloadPhoto;
   };
 
   useEffect(() => {
