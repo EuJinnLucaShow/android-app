@@ -14,8 +14,8 @@ import { Camera } from 'expo-camera';
 import * as Location from 'expo-location';
 import { FontAwesome, Feather, SimpleLineIcons } from '@expo/vector-icons';
 
+import * as ImagePicker from 'expo-image-picker';
 import { storage } from '../../../FirebaseConfig';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 
 export default function CreatePostsScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
@@ -29,35 +29,41 @@ export default function CreatePostsScreen({ navigation }) {
   const takePhoto = async () => {
     if (camera) {
       const photo = await camera.takePictureAsync(null);
-      const location = await Location.getCurrentPositionAsync({});
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
       setLocation(location);
       setPhoto(photo.uri);
     }
   };
 
-  const sendPhoto = () => {
-    uploadPhotoToServer();
-    navigation.navigate('Posts', { photo, location });
-    clearData();
+  const sendPhoto = async () => {
+    try {
+      await uploadPhotoToServer();
+      navigation.navigate('Posts', { photo, location });
+      clearData();
+    } catch (error) {
+      console.error('Error sending photo:', error);
+      // Handle the error, show a message to the user, etc.
+    }
   };
 
   const uploadPhotoToServer = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      quality: 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    });
+    if (!result.canceled) {
+      let response = await fetch(result.assets[0].uri);
+      let blob = await response.blob(result.assets[0].uri);
+      let ref = storage.ref().child('images/' + result.assets[0].uri);
+      ref.put(blob);
+    }
+
     const response = await fetch(photo);
-    const file = await response.blob();
-
-    const uniqueImageId = Date.now().toString();
-    const path = `images/${uniqueImageId}.jpeg`;
-
-    const storageRef = ref(storage, path);
-
-    const metadata = {
-      contentType: 'image/jpeg',
-    };
-
-    await uploadBytes(storageRef, file, metadata);
-
-    const downloadPhoto = await getDownloadURL(storageRef);
-    return downloadPhoto;
+    const blob = await response.blob();
+    const ref = storage.ref().child('images/' + photo);
+    return ref.put(blob);
   };
 
   useEffect(() => {
@@ -106,7 +112,7 @@ export default function CreatePostsScreen({ navigation }) {
                   height: 240,
                 }}
                 type={Camera.Constants.Type.back}
-                ref={setCamera}
+                ref={ref => setCamera(ref)} // Assign the Camera instance to the camera state
               >
                 <TouchableOpacity
                   style={styles.addPhotoButton}
