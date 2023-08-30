@@ -33,6 +33,7 @@ export const UseRoute = isAuth => {
       screenOptions={{
         tabBarShowLabel: false,
         tabBarStyle: { height: 80 },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <MainTab.Screen

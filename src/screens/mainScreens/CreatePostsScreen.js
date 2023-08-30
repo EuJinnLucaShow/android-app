@@ -14,16 +14,18 @@ import { Camera } from 'expo-camera';
 import * as Location from 'expo-location';
 import { FontAwesome, Feather, SimpleLineIcons } from '@expo/vector-icons';
 
-import * as ImagePicker from 'expo-image-picker';
-import { storage } from '../../../FirebaseConfig';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function CreatePostsScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
   const [photo, setPhoto] = useState(null);
+  const [photoName, setPhotoName] = useState(null);
   const [location, setLocation] = useState(null);
 
   const clearData = () => {
     setPhoto(null);
+    setPhotoName(null);
+    setLocation(null);
   };
 
   const takePhoto = async () => {
@@ -34,36 +36,33 @@ export default function CreatePostsScreen({ navigation }) {
       });
       setLocation(location);
       setPhoto(photo.uri);
+      console.log(photo.uri);
     }
   };
 
   const sendPhoto = async () => {
     try {
-      await uploadPhotoToServer();
+      await uploadPhotoToServer(); // Pass the location name to the function
       navigation.navigate('Posts', { photo, location });
       clearData();
     } catch (error) {
       console.error('Error sending photo:', error);
-      // Handle the error, show a message to the user, etc.
     }
   };
 
   const uploadPhotoToServer = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      quality: 1,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    });
-    if (!result.canceled) {
-      let response = await fetch(result.assets[0].uri);
-      let blob = await response.blob(result.assets[0].uri);
-      let ref = storage.ref().child('images/' + result.assets[0].uri);
-      ref.put(blob);
-    }
+    const uniqPostId = Date.now().toString();
+    try {
+      const response = await fetch(photo);
+      const file = await response.blob();
+      const imageRef = ref(storage, `postImage/${uniqPostId}`);
+      await uploadBytes(imageRef, file);
 
-    const response = await fetch(photo);
-    const blob = await response.blob();
-    const ref = storage.ref().child('images/' + photo);
-    return ref.put(blob);
+      const processedPhoto = await getDownloadURL(imageRef);
+      return processedPhoto;
+    } catch (error) {
+      console.log('error', error.message);
+    }
   };
 
   useEffect(() => {
@@ -74,7 +73,7 @@ export default function CreatePostsScreen({ navigation }) {
         return;
       }
     })();
-  });
+  }, []); // Don't forget the `[]`, which will prevent useEffect from running in an infinite loop
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -137,7 +136,14 @@ export default function CreatePostsScreen({ navigation }) {
               {photo ? 'Редагувати фото' : 'Завантажте фото'}
             </Text>
 
-            <TextInput style={styles.photoMetaInput} placeholder="Назва..." />
+            <TextInput
+              style={styles.photoMetaInput}
+              placeholder="Назва..."
+              type={'text'}
+              name={'photoName'}
+              value={photoName}
+              onChangeText={setPhotoName}
+            />
             <View style={{ position: 'relative', marginBottom: 32 }}>
               <TouchableOpacity style={styles.mapButton}>
                 <SimpleLineIcons
@@ -151,6 +157,12 @@ export default function CreatePostsScreen({ navigation }) {
                 placeholder="Місцевість..."
                 type={'text'}
                 name={'photoLocation'}
+                value={
+                  location
+                    ? location.coords.latitude + ' ' + location.coords.longitude
+                    : ''
+                }
+                onChangeText={setLocation}
               />
             </View>
             <TouchableOpacity
@@ -186,7 +198,7 @@ export default function CreatePostsScreen({ navigation }) {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.removePostButton}>
+          <TouchableOpacity style={styles.removePostButton} onPress={clearData}>
             <Feather name="trash-2" size={24} />
           </TouchableOpacity>
         </View>

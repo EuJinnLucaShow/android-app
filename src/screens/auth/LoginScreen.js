@@ -122,7 +122,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   containerKeyBoard: {
-    // justifyContent: 'flex-end',
+    flex: 1,
+    justifyContent: 'flex-end',
+    width: '100%',
   },
   innerContainer: {
     width: '100%',

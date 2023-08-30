@@ -1,4 +1,3 @@
-import { Alert } from 'react-native';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -10,42 +9,28 @@ import {
 import { auth } from '../../../FirebaseConfig';
 import { authSlice } from './authReducer';
 
-const { updateUserProfile, authStateChange, updateUserAvatar, authSignOut } =
-  authSlice.actions;
+const { updateUserProfile, authStateChange, authSignOut } = authSlice.actions;
 
 export const authSignUpUser =
-  ({ email, password, name, userAvatar }) =>
+  ({ email, password, login }) =>
   async (dispatch, getState) => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       const user = auth.currentUser;
 
-      await updateProfile(user, { displayName: name, photoURL: userAvatar });
+      await updateProfile(user, { displayName: login });
 
-      const { uid, displayName, photoURL } = user;
+      const { uid, displayName } = user;
 
       dispatch(
         updateUserProfile({
           userId: uid,
-          name: displayName,
+          login: displayName,
           email,
-          avatar: photoURL,
         })
       );
     } catch (error) {
-      const errorCode = error.code;
-
-      if (errorCode == 'auth/weak-password') {
-        Alert.alert('The password is too weak');
-      }
-      if (errorCode == 'auth/email-already-in-use') {
-        Alert.alert('Already exists an account with the given email address');
-      }
-      if (errorCode == 'auth/invalid-email') {
-        Alert.alert('Email address is not valid and it is required');
-      } else {
-        throw error;
-      }
+      console.log('error: ', error);
     }
   };
 
@@ -56,22 +41,7 @@ export const authSignInUser =
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
-      const errorCode = error.code;
-
-      if (errorCode === 'auth/wrong-password') {
-        Alert.alert('Password is invalid for the given email');
-      }
-      if (errorCode === 'auth/user-not-found') {
-        Alert.alert('No user corresponding to the given email');
-      }
-      if (errorCode === 'auth/user-disabled') {
-        Alert.alert('User corresponding to the given email has been disabled');
-      }
-      if (errorCode === 'auth/invalid-email') {
-        Alert.alert('Email address is not valid and it`s required');
-      } else {
-        throw error;
-      }
+      console.log('error: ', error);
     }
   };
 
@@ -81,9 +51,8 @@ export const authStateChangeUser = () => async dispatch => {
       if (user) {
         const userUpdateProfile = {
           userId: user.uid,
-          name: user.displayName,
+          login: user.displayName,
           email: user.email,
-          avatar: user.photoURL,
         };
 
         dispatch(authStateChange({ stateChange: true }));
@@ -97,23 +66,11 @@ export const authStateChangeUser = () => async dispatch => {
   });
 };
 
-export const changeAvatarUser = newAvatarURL => async (dispatch, getState) => {
-  const user = auth.currentUser;
-
-  if (user !== null) {
-    await updateProfile(user, {
-      photoURL: newAvatarURL,
-    });
-  }
-  dispatch(updateUserAvatar({ avatar: newAvatarURL }));
-};
-
 export const authSignOutUser = () => async (dispatch, getState) => {
   try {
     await signOut(auth);
     dispatch(authSignOut());
   } catch (error) {
-    Alert.alert(error.message);
-    throw error;
+    console.log('error: ', error);
   }
 };
